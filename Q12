@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_set>
+
+using namespace std;
+
+struct Person {
+    int id;
+    vector<string> languages;
+};
+
+bool canCommunicate(const Person& person1, const Person& person2) {
+    unordered_set<string> langSet(person1.languages.begin(), person1.languages.end());
+    
+    for (const string& lang : person2.languages) {
+        if (langSet.find(lang) != langSet.end()) {
+            return true;  
+        }
+    }
+    
+    return false;  
+}
+
+int minTranslationPeople(const vector<Person>& people, int startId, int targetId) {
+    queue<int> q;
+    unordered_set<int> visited;
+
+    q.push(startId);
+    visited.insert(startId);
+
+    int level = 0;
+
+    while (!q.empty()) {
+        int size = q.size();
+        
+        for (int i = 0; i < size; ++i) {
+            int currentId = q.front();
+            q.pop();
+
+            if (currentId == targetId) {
+                return level;
+            }
+
+            const Person& currentPerson = people[currentId];
+
+            for (int j = 0; j < people.size(); ++j) {
+                if (visited.find(j) == visited.end() && canCommunicate(currentPerson, people[j])) {
+                    q.push(j);
+                    visited.insert(j);
+                }
+            }
+        }
+
+        level++;
+    }
+
+    return -1;  
+}
+
+int main() {
+  
+    vector<Person> people = {
+        {1, {"hindi", "english", "gujarati"}},
+        {2, {"hindi", "odia"}},
+        {3, {"tamil", "english"}},
+        {4, {"odia", "spanish"}},
+        {5, {"gujarati", "tamil"}},
+        {6, {"tamil", "odia"}},
+        {7, {"telugu", "english"}},
+        {8, {"telugu", "hindi"}},
+        {9, {"marathi", "hindi"}},
+        {10, {"english", "spanish"}}
+    };
+
+    int startId = 0;  
+    int targetId = 3;  
+
+    int minPeople = minTranslationPeople(people, startId, targetId);
+
+    if (minPeople != -1) {
+        cout << "Person " << startId + 1 << " needs " << minPeople << " person(s) to translate to reach Person " << targetId + 1 << "." << endl;
+    } else {
+        cout << "No path found for communication." << endl;
+    }
+
+    return 0;
+}
+
